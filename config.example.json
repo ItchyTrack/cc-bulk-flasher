@@ -1,0 +1,8 @@
+{
+  "repo": "youruser/yourrepo",
+  "branch": "main",
+  "src_dir": "lua",
+  "dist_dir": "dist",
+  "signing_key": "0000000000000000000000000000000000000000000000000000000000000000",
+  "protocol": "cc-bulk-flasher"
+}

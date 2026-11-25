@@ -1,0 +1,17 @@
+{
+    "arm": {"pull": [
+		"startup.lua",
+		"lib/*",
+		"modules/arm/*"
+	]},
+    "controller": {"pull": [
+		"startup.lua",
+		"lib/*",
+		"modules/controller/*"
+	]},
+    "monitor": {"pull": [
+		"startup.lua",
+		"display.lua",
+		"lib/*"
+	]}
+}
