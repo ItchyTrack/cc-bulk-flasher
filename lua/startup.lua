@@ -10,9 +10,17 @@ local function runEntrypoint(spawn)
         return
     end
 
-    local mod = dofile(path)
+    local ok, mod = pcall(dofile, path)
+    if not ok then
+        print("ghu: main.lua failed to load: " .. tostring(mod))
+        return
+    end
+
     if type(mod) == "table" and type(mod.main) == "function" then
-        mod.main(spawn)
+        local ok2, err = pcall(mod.main, spawn)
+        if not ok2 then
+            print("ghu: main.lua crashed: " .. tostring(err))
+        end
     end
 end
 
