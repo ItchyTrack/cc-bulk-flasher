@@ -113,6 +113,25 @@ def gh_release(repo_dir: Path, tag: str) -> None:
 		check=True,
 	)
 
+PULL_STRIP_MARKER = "|"
+
+def parse_pull_entry(entry: str) -> tuple[str, str]:
+	if PULL_STRIP_MARKER not in entry:
+		return entry, ""
+	prefix, rest = entry.split(PULL_STRIP_MARKER, 1)
+	strip = prefix.rstrip("/")
+	rest = rest.lstrip("/")
+	pattern = f"{strip}/{rest}" if strip else rest
+	return pattern, strip
+
+def strip_prefix(rel: str, strip: str, target: str, entry: str) -> str:
+	if rel == strip:
+		return Path(rel).name
+	prefix = strip + "/"
+	if rel.startswith(prefix):
+		return rel[len(prefix):]
+	sys.exit(f"Target '{target}': strip prefix from '{entry}' doesn't match path '{rel}'")
+
 def build_manifest(repo_dir: Path, dist_dir: str, repo: str, tag: str) -> dict:
 	dist = repo_dir / dist_dir
 	targets_file = repo_dir / "targets.json"
@@ -122,7 +141,8 @@ def build_manifest(repo_dir: Path, dist_dir: str, repo: str, tag: str) -> dict:
 	targets = {}
 	for target, config in sorted(target_config.items()):
 		files = {}
-		for pattern in config.get("pull", []):
+		for entry in config.get("pull", []):
+			pattern, strip = parse_pull_entry(entry)
 			matches = sorted(dist.glob(pattern))
 			if not matches:
 				sys.exit(f"Target '{target}': pull pattern matched no files: {pattern}")
@@ -130,7 +150,8 @@ def build_manifest(repo_dir: Path, dist_dir: str, repo: str, tag: str) -> dict:
 				if not path.is_file(): continue
 				rel = path.relative_to(dist).as_posix()
 				url = f"https://raw.githubusercontent.com/{repo}/{tag}/{dist_dir}/{rel}"
-				files[rel] = {"path": rel, "url": url}
+				dest = strip_prefix(rel, strip, target, entry) if strip else rel
+				files[dest] = {"path": dest, "url": url}
 
 		targets[target] = sorted(files.values(), key=lambda file: file["path"])
 	return {"tag": tag, "targets": targets}
