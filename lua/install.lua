@@ -73,13 +73,14 @@ if rootArg and rootArg ~= "" then
     config.root = rootArg
 end
 
+shell.run("set motd.enable false")
+
 local configFile = fs.open(DEST .. "config.lua", "w+")
 
 configFile.write("return " .. textutils.serialize(config) .. "\n")
 configFile.close()
 
 local startupFile = fs.open("/startup.lua", "w")
-startupFile.write('shell.run("set motd.enable false")\n')
 startupFile.write('shell.run("' .. DEST .. 'startup.lua")\n')
 startupFile.close()
 
