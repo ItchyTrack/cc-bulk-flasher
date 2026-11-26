@@ -39,7 +39,7 @@ local function applyFiles(files, root)
             resp.close()
             count = count + 1
         else
-            print("ghu: failed to download " .. file.url)
+            print("flasher: failed to download " .. file.url)
         end
     end
     return count
@@ -48,7 +48,7 @@ end
 function M.listen(config)
     local pubkeyBytes = hexToBytes(config.pubkey)
     rednet.open(findModemSide())
-    print("ghu: listening for updates (" .. config.subpath .. ")")
+    print("flasher: listening for updates (" .. config.subpath .. ")")
 
     while true do
         local _, payload = rednet.receive(config.protocol)
@@ -62,15 +62,15 @@ function M.listen(config)
                 if ok and manifest and manifest.targets then
                     local files = manifest.targets[config.subpath]
                     if files then
-                        print("ghu: applying update " .. tostring(manifest.tag))
+                        print("flasher: applying update " .. tostring(manifest.tag))
                         local count = applyFiles(files, config.root)
-                        print("ghu: wrote " .. count .. " file(s)")
+                        print("flasher: wrote " .. count .. " file(s)")
                         if count > 0 then os.reboot() end
                     end
                 end
             end
         else
-            print("ghu: dropped broadcast with invalid/missing signature")
+            print("flasher: dropped broadcast with invalid/missing signature")
         end
     end
 end
